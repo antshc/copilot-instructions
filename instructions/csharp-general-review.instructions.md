@@ -62,23 +62,35 @@ When performing a code review, check for:
 - Code should be self-documenting; comments only when necessary
 
 ### Examples
-```javascript
+```csharp
 // ❌ BAD: Poor naming and magic numbers
-function calc(x, y) {
-    if (x > 100) return y * 0.15;
-    return y * 0.10;
+public static decimal Calc(decimal x, decimal y)
+{
+    if (x > 100)
+        return y * 0.15m;
+
+    return y * 0.10m;
 }
+
 
 // ✅ GOOD: Clear naming and constants
-const PREMIUM_THRESHOLD = 100;
-const PREMIUM_DISCOUNT_RATE = 0.15;
-const STANDARD_DISCOUNT_RATE = 0.10;
+public static class DiscountCalculator
+{
+    private const decimal c_premiumThreshold = 100m;
+    private const decimal c_remiumDiscountRate = 0.15m;
+    private const decimal c_standardDiscountRate = 0.10m;
 
-function calculateDiscount(orderTotal, itemPrice) {
-    const isPremiumOrder = orderTotal > PREMIUM_THRESHOLD;
-    const discountRate = isPremiumOrder ? PREMIUM_DISCOUNT_RATE : STANDARD_DISCOUNT_RATE;
-    return itemPrice * discountRate;
+    public static decimal CalculateDiscount(decimal orderTotal, decimal itemPrice)
+    {
+        bool isPremiumOrder = orderTotal > PremiumThreshold;
+        decimal discountRate = isPremiumOrder
+            ? PremiumDiscountRate
+            : StandardDiscountRate;
+
+        return itemPrice * discountRate;
+    }
 }
+
 ```
 
 ### Error Handling
@@ -89,62 +101,44 @@ function calculateDiscount(orderTotal, itemPrice) {
 - Use appropriate error types/exceptions
 
 ### Examples
-```python
-# ❌ BAD: Silent failure and generic error
-def process_user(user_id):
-    try:
-        user = db.get(user_id)
-        user.process()
-    except:
-        pass
+```csharp
+// ❌ BAD: Silent failure and generic error
+public void ProcessUser(int userId)
+{
+    try
+    {
+        var user = db.Get(userId);
+        user.Process();
+    }
+    catch
+    {
+        // swallow exception ❌
+    }
+}
 
-# ✅ GOOD: Explicit error handling
-def process_user(user_id):
-    if not user_id or user_id <= 0:
-        raise ValueError(f"Invalid user_id: {user_id}")
+// ✅ GOOD: Explicit error handling
+public void ProcessUser(int userId)
+{
+    if (userId <= 0)
+        throw new ArgumentException($"Invalid userId: {userId}", nameof(userId));
 
-    try:
-        user = db.get(user_id)
-    except UserNotFoundError:
-        raise UserNotFoundError(f"User {user_id} not found in database")
-    except DatabaseError as e:
-        raise ProcessingError(f"Failed to retrieve user {user_id}: {e}")
+    User user;
+    try
+    {
+        user = db.Get(userId);
+    }
+    catch (UserNotFoundException)
+    {
+        throw new UserNotFoundException($"User {userId} not found in database");
+    }
+    catch (DatabaseException ex)
+    {
+        throw new ProcessingException($"Failed to retrieve user {userId}", ex);
+    }
 
-    return user.process()
+    user.Process();
+}
 ```
-
-## Security Review
-
-When performing a code review, check for security issues:
-
-- **Sensitive Data**: No passwords, API keys, tokens, or PII in code or logs
-- **Input Validation**: All user inputs are validated and sanitized
-- **SQL Injection**: Use parameterized queries, never string concatenation
-- **Authentication**: Proper authentication checks before accessing resources
-- **Authorization**: Verify user has permission to perform action
-- **Cryptography**: Use established libraries, never roll your own crypto
-- **Dependency Security**: Check for known vulnerabilities in dependencies
-
-### Examples
-```java
-// ❌ BAD: SQL injection vulnerability
-String query = "SELECT * FROM users WHERE email = '" + email + "'";
-
-// ✅ GOOD: Parameterized query
-PreparedStatement stmt = conn.prepareStatement(
-    "SELECT * FROM users WHERE email = ?"
-);
-stmt.setString(1, email);
-```
-
-```javascript
-// ❌ BAD: Exposed secret in code
-const API_KEY = "sk_live_abc123xyz789";
-
-// ✅ GOOD: Use environment variables
-const API_KEY = process.env.API_KEY;
-```
-
 ## Testing Standards
 
 When performing a code review, verify test quality:
@@ -158,22 +152,30 @@ When performing a code review, verify test quality:
 - **Mock Appropriately**: Mock external dependencies, not domain logic
 
 ### Examples
-```typescript
-// ❌ BAD: Vague name and assertion
-test('test1', () => {
-    const result = calc(5, 10);
-    expect(result).toBeTruthy();
-});
+```csharp
+// ❌ BAD: Vague name and weak assertion
+[Fact]
+public void Test1()
+{
+    var result = Calc(5m, 10m);
+    Assert.True(result > 0);
+}
 
 // ✅ GOOD: Descriptive name and specific assertion
-test('should calculate 10% discount for orders under $100', () => {
-    const orderTotal = 50;
-    const itemPrice = 20;
+[Fact]
+public void Calculate10PercentDiscountForOrdersUnder100()
+{
+    // Arrange
+    decimal orderTotal = 50m;
+    decimal itemPrice = 20m;
 
-    const discount = calculateDiscount(orderTotal, itemPrice);
+    // Act
+    decimal discount = CalculateDiscount(orderTotal, itemPrice);
 
-    expect(discount).toBe(2.00);
-});
+    // Assert
+    Assert.Equal(2.00m, discount);
+}
+
 ```
 
 ## Performance Considerations
@@ -188,16 +190,27 @@ When performing a code review, check for performance issues:
 - **Lazy Loading**: Load data only when needed
 
 ### Examples
-```python
-# ❌ BAD: N+1 query problem
-users = User.query.all()
-for user in users:
-    orders = Order.query.filter_by(user_id=user.id).all()  # N+1!
+```csharp
+// ❌ BAD: N+1 query problem
+var users = dbContext.Users.ToList();
 
-# ✅ GOOD: Use JOIN or eager loading
-users = User.query.options(joinedload(User.orders)).all()
-for user in users:
-    orders = user.orders
+foreach (var user in users)
+{
+    var orders = dbContext.Orders
+        .Where(o => o.UserId == user.Id)
+        .ToList(); // N+1 queries ❌
+}
+
+// ✅ GOOD: Use eager loading with Include (JOIN)
+var users = dbContext.Users
+    .Include(u => u.Orders)
+    .ToList();
+
+foreach (var user in users)
+{
+    var orders = user.Orders; // already loaded ✅
+}
+
 ```
 
 ## Architecture and Design
@@ -210,16 +223,6 @@ When performing a code review, verify architectural principles:
 - **Loose Coupling**: Components should be independently testable
 - **High Cohesion**: Related functionality grouped together
 - **Consistent Patterns**: Follow established patterns in the codebase
-
-## Documentation Standards
-
-When performing a code review, check documentation:
-
-- **API Documentation**: Public APIs must be documented (purpose, parameters, returns)
-- **Complex Logic**: Non-obvious logic should have explanatory comments
-- **README Updates**: Update README when adding features or changing setup
-- **Breaking Changes**: Document any breaking changes clearly
-- **Examples**: Provide usage examples for complex features
 
 ## Comment Format Template
 
@@ -280,15 +283,30 @@ financial errors or data inconsistencies.
 
 **Suggested fix:**
 Add test case:
-```javascript
-test('should process full refund when order is cancelled', () => {
-    const order = createOrder({ total: 100, status: 'cancelled' });
+```csharp
+[Fact]
+public void Should_Process_Full_Refund_When_Order_Is_Cancelled()
+{
+    // Arrange
+    var order = CreateOrder(new Order
+    {
+        Total = 100m,
+        Status = OrderStatus.Cancelled
+    });
 
-    const result = processPayment(order, { type: 'refund' });
+    var paymentRequest = new PaymentRequest
+    {
+        Type = PaymentType.Refund
+    };
 
-    expect(result.refundAmount).toBe(100);
-    expect(result.status).toBe('refunded');
-});
+    // Act
+    var result = ProcessPayment(order, paymentRequest);
+
+    // Assert
+    Assert.Equal(100m, result.RefundAmount);
+    Assert.Equal(PaymentStatus.Refunded, result.Status);
+}
+
 ```
 ```
 
@@ -302,23 +320,29 @@ The nested if statements on lines 30-40 make the logic hard to follow.
 Simpler code is easier to maintain, debug, and test.
 
 **Suggested fix:**
-```javascript
-// Instead of nested ifs:
-if (user) {
-    if (user.isActive) {
-        if (user.hasPermission('write')) {
+```charp
+// ❌ BAD: Nested ifs (harder to read)
+if (user != null)
+{
+    if (user.IsActive)
+    {
+        if (user.HasPermission("write"))
+        {
             // do something
         }
     }
 }
 
-// Consider guard clauses:
-if (!user || !user.isActive || !user.hasPermission('write')) {
+// ✅ GOOD: Guard clauses (clear and flat)
+if (user is null || !user.IsActive || !user.HasPermission("write"))
+{
     return;
 }
+
 // do something
+
 ```
-```
+
 
 ## Review Checklist
 
@@ -358,61 +382,3 @@ When performing a code review, systematically verify:
 - [ ] Proper separation of concerns
 - [ ] No architectural violations
 - [ ] Dependencies flow in correct direction
-
-### Documentation
-- [ ] Public APIs are documented
-- [ ] Complex logic has explanatory comments
-- [ ] README is updated if needed
-- [ ] Breaking changes are documented
-
-## Project-Specific Customizations
-
-To customize this template for your project, add sections for:
-
-1. **Language/Framework specific checks**
-   - Example: "When performing a code review, verify React hooks follow rules of hooks"
-   - Example: "When performing a code review, check Spring Boot controllers use proper annotations"
-
-2. **Build and deployment**
-   - Example: "When performing a code review, verify CI/CD pipeline configuration is correct"
-   - Example: "When performing a code review, check database migrations are reversible"
-
-3. **Business logic rules**
-   - Example: "When performing a code review, verify pricing calculations include all applicable taxes"
-   - Example: "When performing a code review, check user consent is obtained before data processing"
-
-4. **Team conventions**
-   - Example: "When performing a code review, verify commit messages follow conventional commits format"
-   - Example: "When performing a code review, check branch names follow pattern: type/ticket-description"
-
-## Additional Resources
-
-For more information on effective code reviews and GitHub Copilot customization:
-
-- [GitHub Copilot Prompt Engineering](https://docs.github.com/en/copilot/concepts/prompting/prompt-engineering)
-- [GitHub Copilot Custom Instructions](https://code.visualstudio.com/docs/copilot/customization/custom-instructions)
-- [Awesome GitHub Copilot Repository](https://github.com/github/awesome-copilot)
-- [GitHub Code Review Guidelines](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests)
-- [Google Engineering Practices - Code Review](https://google.github.io/eng-practices/review/)
-- [OWASP Security Guidelines](https://owasp.org/)
-
-## Prompt Engineering Tips
-
-When performing a code review, apply these prompt engineering principles from the [GitHub Copilot documentation](https://docs.github.com/en/copilot/concepts/prompting/prompt-engineering):
-
-1. **Start General, Then Get Specific**: Begin with high-level architecture review, then drill into implementation details
-2. **Give Examples**: Reference similar patterns in the codebase when suggesting changes
-3. **Break Complex Tasks**: Review large PRs in logical chunks (security → tests → logic → style)
-4. **Avoid Ambiguity**: Be specific about which file, line, and issue you're addressing
-5. **Indicate Relevant Code**: Reference related code that might be affected by changes
-6. **Experiment and Iterate**: If initial review misses something, review again with focused questions
-
-## Project Context
-
-This is a generic template. Customize this section with your project-specific information:
-
-- **Tech Stack**: [e.g., Java 17, Spring Boot 3.x, PostgreSQL]
-- **Architecture**: [e.g., Hexagonal/Clean Architecture, Microservices]
-- **Build Tool**: [e.g., Gradle, Maven, npm, pip]
-- **Testing**: [e.g., JUnit 5, Jest, pytest]
-- **Code Style**: [e.g., follows Google Style Guide]
