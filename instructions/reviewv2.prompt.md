@@ -125,7 +125,7 @@ When performing a code review, verify test quality:
 - **Edge Cases**: Test boundary conditions, null values, empty collections
 - **Mock Appropriately**: Mock external dependencies, not domain logic
 
-### Examples
+#### Examples
 ```csharp
 [Fact]
 public void Calculate10PercentDiscountForOrdersUnder100()
@@ -154,7 +154,7 @@ When performing a code review, check for performance issues:
 - **Pagination**: Large result sets should be paginated
 - **Lazy Loading**: Load data only when needed
 
-### Examples
+#### Examples
 ```csharp
 var users = dbContext.Users
     .Include(u => u.Orders)
