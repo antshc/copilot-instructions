@@ -23,20 +23,25 @@ Check cross-file contracts, shared invariants, and interactions.
 
 ### 2. Async / Concurrency
 - [ ] Missing `CancellationToken`
-- [ ] Sync-over-async (`.Result`, `.Wait`)
+- [ ] Sync-over-async (`.Result`, `.Wait`), Async All the Things
+- [ ] Parallelizable async work uses WhenAll / WhenAny with bounded concurrency (no sequential awaits)
+- [ ] Use Task Pre-Fetching to Maximize Concurrency
 - [ ] Race conditions / TOCTOU
 - [ ] Thread safety of shared state
 - [ ] Lock / semaphore misuse
 - [ ] Deadlock or starvation risk
+- [ ] Handle Exceptions Explicitly in Async Code
+- [ ] Prefer Async Streams for Large Result Sets
 
 ### 3. Performance
 - [ ] Hot-path allocations (closures, boxing)
 - [ ] Multiple enumerations
 - [ ] Algorithms: Appropriate time/space complexity for the use case
 - [ ] Repeated I/O or N+1 patterns
-- [ ] Large result sets should be paginated
+- [ ] Large result sets should be paginated, Avoid retrieving all records at once
 - [ ] Load data only when needed
-- [ ] Incorrect lifetime of expensive resources (Proper cleanup of connections, files, streams etc..,)
+- [ ] Incorrect lifetime of expensive resources (Proper cleanup of connections, files, streams etc...)
+- [ ] Use Appropriate Caching Strategies (Field/Local Cache, IDictionary/Concurrent Dictionary, IMemoryCache etc..)
 
 ### 4. Maintainability
 - [ ] Method/class cohesion
