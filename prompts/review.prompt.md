@@ -44,7 +44,8 @@ Check cross-file contracts, shared invariants, and interactions.
 - [ ] Use Appropriate Caching Strategies (Field/Local Cache, IDictionary/Concurrent Dictionary, IMemoryCache etc..)
 
 ### 4. Maintainability
-- [ ] Method/class cohesion
+- [ ] Responsibilities are clear and cohesive (no mixed or unrelated concerns)
+- [ ] Unnecessary complexity or indirection is avoided (no over-engineering)
 - [ ] Abstraction leaks
 
 ## Output Format (mandatory)
