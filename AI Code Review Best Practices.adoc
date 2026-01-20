@@ -1,0 +1,165 @@
+= AI Code Review Best Practices (for .NET Projects)
+:toc:
+:toclevels: 2
+:sectnums:
+
+== Purpose
+
+This document describes **best practices for using the AI Code Review Prompt effectively**
+in C# 12, .NET 8, and ASP.NET Core 8 projects with StyleCop, .editorconfig, and SonarQube
+enforced in CI.
+
+The goal is to maximize **signal**, reduce **noise**, and ensure **safe, actionable reviews**.
+
+---
+
+== 1. Review Scope Best Practices
+
+=== 1.1 Optimal File Count
+* ✅ 3–7 files per review (ideal)
+* ⚠️ 8–15 files: use two-pass review
+* ❌ 16+ files: split by module or concern
+
+Rule of thumb:
+
+[quote]
+If you can explain the change in one paragraph, review it in one pass.
+If not, split the review.
+
+---
+
+=== 1.2 Prefer Cohesive Changes
+AI performs best when files:
+* belong to the same feature or fix
+* share context and invariants
+* change together logically
+
+Avoid reviewing:
+* refactors + behavior changes together
+* unrelated fixes in one pass
+* cross-domain changes at once
+
+---
+
+== 2. Review Workflow (Recommended)
+
+=== 2.1 Small PR (≤ 7 files)
+* Single review pass
+* Full checklist
+* Fix Critical + Suggestion issues
+
+=== 2.2 Medium PR (8–15 files)
+* Pass 1: per-file review
+* Pass 2: cross-file interaction review only
+
+Prompt example:
+----
+Review all files together for interaction bugs only
+----
+
+=== 2.3 Large PR (16+ files)
+* Split PR if possible
+* Otherwise review per folder/module
+* Final pass: system-level risks only
+
+---
+
+== 3. How to Use the Prompt Correctly
+
+=== 3.1 Always Use Scope Instruction
+Always include:
+----
+Review all provided files as one logical change
+----
+
+This enables:
+* contract validation
+* lifecycle bugs detection
+* cross-file async issues
+* invariant violations
+
+---
+
+=== 3.2 Prefer Minimal Diffs
+Minimal diff means:
+* smallest change that fixes the issue
+* no cleanup or refactoring
+* no renaming or reordering
+* no architectural redesign
+
+Bugfix PRs should be safe to:
+* review
+* merge
+* rollback
+
+---
+
+=== 3.3 Use Severity Levels Strictly
+* *Critical* → must fix before merge
+* *Suggestion* → fix if safe in scope
+* *Minor/Nit* → optional, no discussion needed
+
+If everything is critical, nothing is.
+
+---
+
+== 4. When to Use Focus Modes
+
+Use modifiers instead of new prompts.
+
+=== 4.1 Concurrency Focus
+----
+Focus on async flow, cancellation, and thread safety
+----
+
+=== 4.2 Performance Focus
+----
+Focus on hot paths, allocations, and IO patterns
+----
+
+=== 4.3 Incident Mode
+----
+Think like a 3am on-call engineer: what breaks under load or partial failure?
+----
+
+---
+
+== 5. Common Mistakes to Avoid
+
+* ❌ Reviewing too many files at once
+* ❌ Letting AI refactor code
+* ❌ Accepting style suggestions
+* ❌ Mixing refactor and behavior changes
+* ❌ Ignoring cross-file reasoning
+* ❌ Not enforcing minimal diffs
+* ❌ Treating AI output as truth (always verify)
+
+---
+
+== 6. Golden Rules
+
+* One prompt, many focus modes
+* Prefer minimal diffs
+* Split large PRs
+* Treat prompt like code (version it)
+* Optimize for production safety, not elegance
+* Write code for the worst day, not the best day
+
+---
+
+== 7. Team Standard (Recommended)
+
+This AI review process is considered:
+* a **supporting reviewer**, not an authority
+* a **risk detector**, not a refactoring engine
+* a **consistency tool**, not a style enforcer
+
+Final responsibility always remains with the human reviewer.
+
+---
+
+== Appendix: One-Line Team Rule
+
+[quote]
+AI reviews help you see risks faster, not think less.
+
