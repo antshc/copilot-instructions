@@ -1,0 +1,245 @@
+= Best Practices for Creating a Core AI Code Review Prompt
+:toc:
+:toclevels: 2
+:sectnums:
+
+== Purpose
+
+This document describes **how to design and maintain a high-signal, low-noise AI code review prompt**
+for professional software teams.
+
+The goal is to ensure the prompt:
+* scales with the codebase
+* produces consistent results
+* avoids refactor noise
+* finds real production risks
+* behaves like a senior reviewer, not a linter
+
+---
+
+== 1. Design Principles (Non-Negotiable)
+
+=== 1.1 Constrain Output, Not Thinking
+A good prompt tells AI:
+* what to look for
+* how to report
+* what NOT to do
+
+It must *not*:
+* prescribe implementations
+* encourage refactors
+* replace architectural decisions
+
+[quote]
+Constrain behavior, not reasoning.
+
+---
+
+=== 1.2 Prefer Risk Detection Over Cleanliness
+The prompt should optimize for:
+* correctness
+* concurrency
+* performance
+* security
+* production safety
+
+Not for:
+* formatting
+* style
+* elegance
+* “clean code” opinions
+
+Static analyzers already cover style.  
+The prompt must focus on what analyzers miss.
+
+---
+
+=== 1.3 Enforce Minimal Diffs
+Always define minimal diffs explicitly:
+
+* smallest change that fixes the issue
+* no cleanup or reordering
+* no refactors unless required for correctness/safety
+* bugfix PRs must be safe to rollback
+
+This single rule removes most AI noise.
+
+---
+
+== 2. Structure of a Good Core Prompt
+
+=== 2.1 Role Definition
+Always define the AI role explicitly:
+
+* senior reviewer
+* production mindset
+* responsible for safety
+* aware of CI enforcement
+
+This prevents junior-style or tutorial output.
+
+---
+
+=== 2.2 Explicit Scope Instruction
+Include one mandatory line:
+
+----
+Review all provided files as one logical change.
+----
+
+This enables:
+* cross-file reasoning
+* invariant checks
+* lifecycle bugs detection
+* interaction risk analysis
+
+Without this, AI reviews files in isolation.
+
+---
+
+=== 2.3 Checklist Size Limits
+Optimal checklist size:
+* 20–25 total items
+* 4–6 sections
+* 3–6 bullets per section
+
+Too few → misses risks  
+Too many → checkbox behavior
+
+---
+
+=== 2.4 Use Checkable Statements
+Checklist items must be verifiable conditions, not advice.
+
+Good:
+* “Async calls are awaited end-to-end”
+* “Large sequences are streamed or paginated”
+
+Bad:
+* “Use async streams”
+* “Prefer better design”
+* “Consider refactoring”
+
+---
+
+== 3. Required Sections in a Core Prompt
+
+Every effective prompt should include:
+
+* Correctness
+* Async / Concurrency
+* Performance / Resources
+* Maintainability
+* (Optional but recommended) Security / Safety
+* Output format with severity
+
+These reflect how senior engineers review code.
+
+---
+
+== 4. Output Discipline
+
+=== 4.1 Severity Levels
+Always enforce severity:
+
+* Critical (must fix)
+* Suggestion / Major (should fix)
+* Minor / Nit (optional)
+
+If everything is critical, nothing is.
+
+---
+
+=== 4.2 Require Impact and Reasoning
+Each finding should include:
+* why it matters
+* what breaks
+* what kind of risk it is
+
+This forces thinking and prevents shallow comments.
+
+---
+
+=== 4.3 Prefer Line-Based Feedback
+Require line numbers or locations when possible.
+This makes feedback:
+* actionable
+* reviewable
+* easy to verify
+
+---
+
+== 5. Use Focus Modes, Not Multiple Prompts
+
+Use one master prompt and add modifiers when needed:
+
+* “Focus on concurrency and cancellation”
+* “Focus on performance and hot paths”
+* “Think like a 3am on-call engineer”
+* “Review only interaction bugs”
+
+Avoid having many separate prompts.
+
+---
+
+== 6. Control Review Scope (Critical)
+
+=== 6.1 Optimal File Count
+* 3–7 files → best quality
+* 8–15 files → two-pass review
+* 16+ files → split or review per module
+
+AI quality degrades with too much scope.
+
+---
+
+=== 6.2 Avoid Mixed Concerns
+Never mix in one review:
+* refactor + behavior change
+* unrelated fixes
+* multiple domains
+
+This destroys signal.
+
+---
+
+== 7. Escape Hatch for Creativity
+Add one controlled escape hatch:
+
+----
+If you find a serious issue not covered above, add “Out-of-Checklist Risk”.
+----
+
+This preserves creativity without chaos.
+
+---
+
+== 8. Treat the Prompt Like Code
+
+* Version it
+* Review it
+* Evolve it slowly
+* Remove unused bullets
+* Add bullets only when real bugs are missed
+* Keep it under one page
+
+[quote]
+A prompt is infrastructure. Maintain it like infrastructure.
+
+---
+
+== 9. Golden Rules
+
+* One prompt, many modes
+* Prefer minimal diffs
+* Optimize for production safety
+* Reduce noise aggressively
+* AI is a reviewer, not an author
+* Humans own decisions
+
+---
+
+== Appendix: One-Line Team Rule
+
+[quote]
+A good AI review prompt makes bugs obvious and changes small.
