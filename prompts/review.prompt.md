@@ -30,18 +30,17 @@ Check cross-file contracts, shared invariants, and interactions.
 - [ ] Deadlock or starvation risk
 
 ### 3. Performance
-- [ ] Hot-path allocations (LINQ, closures, boxing)
+- [ ] Hot-path allocations (closures, boxing)
 - [ ] Multiple enumerations
-- [ ] Excessive async state machines
+- [ ] Algorithms: Appropriate time/space complexity for the use case
 - [ ] Repeated I/O or N+1 patterns
-- [ ] Incorrect lifetime of expensive resources
+- [ ] Large result sets should be paginated
+- [ ] Load data only when needed
+- [ ] Incorrect lifetime of expensive resources (Proper cleanup of connections, files, streams etc..,)
 
 ### 4. Maintainability
-- [ ] Clear responsibility and naming
 - [ ] Method/class cohesion
-- [ ] Testability (time, IO, statics)
 - [ ] Abstraction leaks
-- [ ] Readability under pressure (on-call scenario)
 
 ## Output Format (mandatory)
 
@@ -52,20 +51,14 @@ Check cross-file contracts, shared invariants, and interactions.
 - **Explain your reasoning**
 - **Minimal fix (inline snippet or diff):**
 
-### Major (should fix)
+### Suggestion (should fix)
 - **Line(s):**
 - **Problem:**
 - **Minimal fix:**
 
-### Minor
+### Minor, Nit
 - Short note only
-
-### Nit
 - Optional suggestion only
-
-## Production Risks
-- 1–3 bullets: what could break and how to detect (logs, metrics, alerts)
-
 
 ## Constraints
 - Do not reformat code
