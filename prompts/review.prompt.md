@@ -53,8 +53,7 @@ Check cross-file contracts, shared invariants, and interactions.
 ### Critical (must fix)
 - **Line(s):**
 - **Problem:**
-- **Why it matters:**
-- **Explain your reasoning**
+- **Why it matters and explain your reasoning:**
 - **Minimal fix (inline snippet or diff):**
 
 ### Suggestion (should fix)
