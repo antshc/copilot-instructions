@@ -22,26 +22,22 @@ Check cross-file contracts, shared invariants, and interactions.
 - [ ] Silent failures or swallowed errors
 
 ### 2. Async / Concurrency
-- [ ] Missing `CancellationToken`
-- [ ] Sync-over-async (`.Result`, `.Wait`), Async All the Things
-- [ ] Parallelizable async work uses WhenAll / WhenAny with bounded concurrency (no sequential awaits)
-- [ ] Use Task Pre-Fetching to Maximize Concurrency
-- [ ] Race conditions / TOCTOU
-- [ ] Thread safety of shared state
-- [ ] Lock / semaphore misuse
-- [ ] Deadlock or starvation risk
-- [ ] Handle Exceptions Explicitly in Async Code
-- [ ] Prefer Async Streams for Large Result Sets
+- [ ] Async calls are awaited end-to-end (no sync-over-async boundaries)
+- [ ] Concurrency uses WhenAll/WhenAny with bounded parallelism (no sequential awaits)
+- [ ] Exceptions in async flows are handled intentionally (no unobserved tasks / swallowed errors)
+- [ ] CancellationToken is propagated end-to-end
+- [ ] Shared state is thread-safe; locks/semaphores used correctly
+- [ ] Deadlock/starvation risks considered
 
 ### 3. Performance
 - [ ] Hot-path allocations (closures, boxing)
 - [ ] Multiple enumerations
 - [ ] Algorithms: Appropriate time/space complexity for the use case
 - [ ] Repeated I/O or N+1 patterns
-- [ ] Large result sets should be paginated, Avoid retrieving all records at once
+- [ ] Large sequences use streaming/pagination (avoid loading all into memory)
 - [ ] Load data only when needed
 - [ ] Incorrect lifetime of expensive resources (Proper cleanup of connections, files, streams etc...)
-- [ ] Use Appropriate Caching Strategies (Field/Local Cache, IDictionary/Concurrent Dictionary, IMemoryCache etc..)
+- [ ] Caching is used only where it reduces cost and is correct under concurrency/invalidation. (Field/Local Cache, IDictionary/Concurrent Dictionary, IMemoryCache etc..)
 
 ### 4. Maintainability
 - [ ] Responsibilities are clear and cohesive (no mixed or unrelated concerns)
@@ -53,12 +49,15 @@ Check cross-file contracts, shared invariants, and interactions.
 ### Critical (must fix)
 - **Line(s):**
 - **Problem:**
+- **Impact: (data loss / security / perf / incident risk / correctness)**
 - **Why it matters and explain your reasoning:**
 - **Minimal fix (inline snippet or diff):**
 
 ### Suggestion (should fix)
 - **Line(s):**
 - **Problem:**
+- **Impact: (data loss / security / perf / incident risk / correctness)**
+- **Why it matters and explain your reasoning:**
 - **Minimal fix:**
 
 ### Minor, Nit
@@ -68,6 +67,6 @@ Check cross-file contracts, shared invariants, and interactions.
 ## Constraints
 - Do not reformat code
 - Do not propose style-only changes
-- Prefer minimal diffs
+- Prefer minimal diffs (smallest change that fixes the issue; no refactors unless needed for correctness/safety)
 - Assume analyzers validate style
 - If unsure, ask a clarifying question
