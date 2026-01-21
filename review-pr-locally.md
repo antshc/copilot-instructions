@@ -23,6 +23,15 @@ dotnet format analyzers "./project.sln" --no-restore --verify-no-changes --inclu
 # get rules with error severity from the file, use space seperation
 grep -Po 'CA\d+(?=.*= *error)' .editorconfig | paste -sd' ' -
 
+gh auth login
+copilot -p "Read @format-report.json report, use data from "FileName", "FilePath", "FileChanges" fields to generate code review report in md format. create file with review report.
+Use following template:
+### Issue description
+- **FilePath:**
+- **Line(s):**
+- **Problem:**
+- *Review comment to add in the PR*" --yolo --model gpt-5.2 > output.md
+
 
 # Get git changes, use space seperation
 git diff --name-only HEAD -- '*.cs'
