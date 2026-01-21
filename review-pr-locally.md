@@ -1,4 +1,4 @@
-<img width="800" height="603" alt="image" src="https://github.com/user-attachments/assets/4af46059-9c01-4ae4-ac59-a71ed81bea3b" />## Review PR locally using copilot
+## Create patch
 ```
 ### Create patch from the feature branch
 git format-patch main..feature_branch
@@ -18,7 +18,15 @@ Then all the changes or staged and available for the #changes
 ## Use dotnet format to review the file
 ```
 grep -Po 'CA\d+(?=.*= *error)' .editorconfig | paste -sd, -
-dotnet format analyzers "./main/PromotionWorker.Main.sln" --no-restore --verify-no-changes --include "./main/Zerto.PromotionWorker.Accessors.JournalCache/JournalCacheAccessor.cs" --diagnostics $(grep -Po 'CA\d+(?=.*= *error)' .editorconfig | paste -sd' ' -)
+dotnet format analyzers "./main/PromotionWorker.Main.sln" --no-restore --verify-no-changes --include "./main/Zerto.PromotionWorker.Accessors.JournalCache/JournalCacheAccessor.cs"
+
+# get rules with error severity from the file, use space seperation
+grep -Po 'CA\d+(?=.*= *error)' .editorconfig | paste -sd' ' -
+
+
+# Get git changes, use space seperation
+git diff --name-only -- '*.cs'
+git diff --name-only -- '*.cs' | paste -sd' ' -
 ```
 
 ### Helpers
