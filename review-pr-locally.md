@@ -18,15 +18,15 @@ Then all the changes or staged and available for the #changes
 ## Use dotnet format to review the file
 ```
 grep -Po 'CA\d+(?=.*= *error)' .editorconfig | paste -sd, -
-dotnet format analyzers "./main/PromotionWorker.Main.sln" --no-restore --verify-no-changes --include "./main/Zerto.PromotionWorker.Accessors.JournalCache/JournalCacheAccessor.cs"
+dotnet format analyzers "./project.sln" --no-restore --verify-no-changes --include $(git diff --name-only HEAD -- '*.cs' | paste -sd' ' -) --report ./
 
 # get rules with error severity from the file, use space seperation
 grep -Po 'CA\d+(?=.*= *error)' .editorconfig | paste -sd' ' -
 
 
 # Get git changes, use space seperation
-git diff --name-only -- '*.cs'
-git diff --name-only -- '*.cs' | paste -sd' ' -
+git diff --name-only HEAD -- '*.cs'
+git diff --name-only HEAD -- '*.cs' | paste -sd' ' -
 ```
 
 ### Helpers
