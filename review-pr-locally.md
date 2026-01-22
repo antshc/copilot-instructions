@@ -17,6 +17,12 @@ Then all the changes or staged and available for the #changes
 
 ## Use dotnet format to review the file
 ```
+# install copilot cli
+winget install GitHub.Copilot
+
+# login
+gh auth login
+
 grep -Po 'CA\d+(?=.*= *error)' .editorconfig | paste -sd, -
 dotnet format analyzers "./project.sln" --no-restore --verify-no-changes --include $(git diff --name-only HEAD -- '*.cs' | paste -sd' ' -) --report ./
 
