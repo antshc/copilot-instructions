@@ -44,6 +44,38 @@ git diff --name-only HEAD -- '*.cs'
 git diff --name-only HEAD -- '*.cs' | paste -sd' ' -
 ```
 
+```
+#!/usr/bin/env bash
+set -euo pipefail
+
+OUTPUT_DIR="_changes"
+
+rm -rf "$OUTPUT_DIR"
+mkdir -p "$OUTPUT_DIR"
+
+mapfile -t files < <(git diff --name-only HEAD -- '*.cs')
+
+for file in "${files[@]}"; do
+  target_path="$OUTPUT_DIR/$file"
+  target_dir="$(dirname "$target_path")"
+  mkdir -p "$target_dir"
+
+  {
+    echo "FILE: $file"
+    echo
+    echo "----- ORIGINAL (HEAD) -----"
+    if git cat-file -e "HEAD:$file" 2>/dev/null; then
+      git show "HEAD:$file"
+    else
+      echo "[File not present in HEAD]"
+    fi
+    echo
+    echo "----- DIFF -----"
+    git diff HEAD -- "$file"
+  } > "$target_path"
+done
+```
+
 ### Helpers
 ```
 git am --abort
