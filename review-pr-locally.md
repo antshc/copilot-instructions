@@ -23,13 +23,18 @@ winget install GitHub.Copilot
 # login
 gh auth login
 
+echo $GH_TOKEN | gh auth login --with-token
+
 grep -Po 'CA\d+(?=.*= *error)' .editorconfig | paste -sd, -
 dotnet format analyzers "./project.sln" --no-restore --verify-no-changes --include $(git diff --name-only HEAD -- '*.cs' | paste -sd' ' -) --report ./
 
 # get rules with error severity from the file, use space seperation
 grep -Po 'CA\d+(?=.*= *error)' .editorconfig | paste -sd' ' -
 
-gh auth login
+echo $GH_TOKEN | gh auth login --with-token
+copilot -p "Read @test_r, do code review*" --yolo --model gpt-5.2 > output.md
+
+echo $GH_TOKEN | gh auth login --with-token
 copilot -p "Read @format-report.json report, use data from "FileName", "FilePath", "FileChanges" fields to generate code review report in md format. create file with review report.
 Use following template:
 ### Issue description
@@ -46,9 +51,18 @@ git diff --name-only HEAD -- '*.cs' | paste -sd' ' -
 
 ```
 #!/usr/bin/env bash
-set -euo pipefail
 
-OUTPUT_DIR="_changes"
+BRANCH_NAME="${1}"
+if [[ -z "$BRANCH_NAME" ]]; then
+  echo "Usage: $0 BRANCH_NAME"
+  exit 1
+fi
+
+git fetch
+git checkout "origin/$BRANCH_NAME"
+git reset --soft $(git merge-base HEAD origin/main)
+
+OUTPUT_DIR="tests_results/_changes"
 
 rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
@@ -74,6 +88,11 @@ for file in "${files[@]}"; do
     git diff HEAD -- "$file"
   } > "$target_path"
 done
+
+git checkout -B $BRANCH_NAME origin/$BRANCH_NAME
+printf "%s" "$GH_TOKEN" | tr -d '\r' | gh auth login --with-token
+# gh auth status
+copilot -p "Read @tests_results/_changes, do code review*" --yolo --model gpt-5.2 > output1.md
 ```
 
 ### Helpers
